@@ -1,13 +1,22 @@
 import json
-from fastapi import FastAPI,Path,HTTPException,Query
+from fastapi import FastAPI,Path,HTTPException,Query,Body 
 
 app = FastAPI()
+
+#load data
 
 def load_data():
     with open("students_db.json", "r") as file:
         data= json.load(file)
     return data
 
+# save data 
+
+def save_data(data):
+    with open("students_db.json", "w") as file:
+        json.dump(data, file)
+        
+        
 @app.get("/")
 def home():
     return {"message": "Student Management System API"}
@@ -56,3 +65,29 @@ description="sort on the basis of class,age, roll,marks"),order:str = Query("asc
         sorted_data = list(data.values())
         sorted_data.sort(key=lambda x: x[sorted_by],reverse=True) 
         return sorted_data 
+
+# create student 
+
+@app.post("/create")
+def create_student(student: dict = Body(...)):
+
+    data = load_data()
+
+    student_id = student["id"]
+
+    if student_id in data:
+        raise HTTPException(
+            status_code=400,
+            detail="Student already exists"
+        )
+
+    del student["id"]
+
+    data[student_id] = student
+
+    save_data(data)
+
+    return {
+        "message": "Student created successfully",
+        "student_id": student_id
+    }
