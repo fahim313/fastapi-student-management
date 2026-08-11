@@ -1,7 +1,7 @@
 import json
 from fastapi import FastAPI,Path,HTTPException,Query,Body 
 from pydantic import BaseModel,Field
-from typing import Annotated 
+from typing import Annotated,Optional 
 app = FastAPI()
 
 class Student(BaseModel):
@@ -24,6 +24,16 @@ class Student(BaseModel):
     ]
     
 
+class StudentUpdate(BaseModel):
+    name: Annotated[Optional[str], Field(default=None)]
+    age: Annotated[Optional[int], Field(default=None)]
+    student_class: Annotated[Optional[int], Field(default=None)]
+    roll: Annotated[Optional[int], Field(default=None)]
+    Math_marks: Annotated[Optional[int], Field(default=None)]
+    English_marks: Annotated[Optional[int], Field(default=None)]
+    Science_marks: Annotated[Optional[int], Field(default=None)]
+    phone: Annotated[Optional[str], Field(default=None)]
+    
 
 #load data
 
@@ -69,7 +79,7 @@ def get_student(student_id:str = Path(...,description="The ID of the student to 
 @app.get("/sort_students")
 def view_sorted_students(sorted_by:str = Query(...,
 description="sort on the basis of student_class,age, roll,marks"),order:str = Query("asc",description="Choose order:asc or desc")):
-    valid_fields = ["age","student_class","rool","Math_marks","English_marks","Science_marks"]
+    valid_fields = ["age","student_class","roll","Math_marks","English_marks","Science_marks"]
     
     if sorted_by not in valid_fields:
         raise HTTPException(status_code=404, detail=f"Invalid field. select from{valid_fields}")
@@ -108,4 +118,23 @@ def create_student(student: Student):
     return {
         "message": "Student created successfully",
         "student_id": student.id
+    }
+    
+    
+    # update student 
+    
+@app.put("/update/{student_id}")
+def update_student(student_id: str, student: StudentUpdate):
+
+    data = load_data()
+
+    if student_id not in data:
+        raise HTTPException(status_code=404, detail="Student not found")
+
+    data[student_id].update(student.model_dump(exclude_unset=True))
+
+    save_data(data)
+    return {
+        "message": "Student updated successfully",
+        "student_id": student_id
     }
