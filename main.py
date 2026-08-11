@@ -1,5 +1,5 @@
 import json
-from fastapi import FastAPI,Path,HTTPException 
+from fastapi import FastAPI,Path,HTTPException,Query
 
 app = FastAPI()
 
@@ -32,3 +32,27 @@ def get_student(student_id:str = Path(...,description="The ID of the student to 
         return data[student_id]
     else:
         raise HTTPException(status_code = 404, detail = f"Student ID {student_id} not found.")
+    
+# Sort students 
+
+@app.get("/sort_students")
+def view_sorted_students(sorted_by:str = Query(...,
+description="sort on the basis of class,age, roll,marks"),order:str = Query("asc",description="Choose order:asc or desc")):
+    valid_fields = ["age","class","rool","Math marks","English marks","Science marks"]
+    
+    if sorted_by not in valid_fields:
+        raise HTTPException(status_code=404, detail=f"Invalid field. select from{valid_fields}")
+    
+    if order not in ['asc','desc']:
+        raise HTTPException(status_code=404,detail="choose between asc or desc")
+    data = load_data()
+    
+    if order == 'asc':
+        sorted_data = list(data.values())
+        sorted_data.sort(key=lambda x: x[sorted_by]) 
+        return sorted_data
+     
+    else:
+        sorted_data = list(data.values())
+        sorted_data.sort(key=lambda x: x[sorted_by],reverse=True) 
+        return sorted_data 
