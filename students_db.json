@@ -118,15 +118,5 @@
     "English_marks": 86,
     "Science_marks": 94,
     "phone": "01710000013"
-  },
-  "S013": {
-    "name": "Fahim sahriar",
-    "age": 17,
-    "student_class": 11,
-    "roll": 48,
-    "Math_marks": 76,
-    "English_marks": 84,
-    "Science_marks": 81,
-    "phone": "01912345678"
   }
 }
